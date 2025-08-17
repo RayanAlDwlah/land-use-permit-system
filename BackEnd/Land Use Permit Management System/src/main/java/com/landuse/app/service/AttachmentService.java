@@ -106,7 +106,6 @@ public class AttachmentService {
             Files.createDirectories(dir);
             Path target = dir.resolve(uuid + "_" + safeName);
 
-// كان mf.transferTo(target.toFile());
             try (var in = mf.getInputStream()) {
                 Files.copy(in, target, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
             }
