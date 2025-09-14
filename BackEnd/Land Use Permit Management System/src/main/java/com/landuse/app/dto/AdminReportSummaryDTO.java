@@ -1,16 +1,11 @@
 package com.landuse.app.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
-public class AdminReportSummaryDTO {
-    private long totalPermits;
-    private long pendingCount;
-    private long approvedCount;
-    private long rejectedCount;
-    private long editRequestedCount;
-}
+public record AdminReportSummaryDTO(
+        @JsonProperty("TOTAL") long TOTAL,
+        @JsonProperty("PENDING") long PENDING,
+        @JsonProperty("APPROVED") long APPROVED,
+        @JsonProperty("REJECTED") long REJECTED,
+        @JsonProperty("EDIT_REQUESTED") long EDIT_REQUESTED
+) {}

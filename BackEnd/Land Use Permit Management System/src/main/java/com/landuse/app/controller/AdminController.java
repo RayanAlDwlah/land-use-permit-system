@@ -8,6 +8,7 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import com.landuse.app.dto.PageResponseDTO;
 
 import java.util.List;
 
@@ -43,6 +44,15 @@ public class AdminController {
         if (body == null || body.comment() == null || body.comment().isBlank())
             throw new IllegalArgumentException("comment is required for request-edit");
         return permitService.adminRequestEdit(id, body.comment());
+    }
+
+    @GetMapping("/permits/page")
+    public PageResponseDTO<PermitDTO> listPaged(
+            @RequestParam(required = false) PermitStatus status,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        return permitService.adminListPaged(status, page, size);
     }
 
     @GetMapping("/reports/summary")

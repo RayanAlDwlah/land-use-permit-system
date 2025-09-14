@@ -12,6 +12,9 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -103,6 +106,11 @@ public class PermitService {
                 .orElseThrow(() -> new ResourceNotFoundException("Permit not found: " + id));
         p.setStatus(PermitStatus.APPROVED);
         if (StringUtils.hasText(comment)) p.setAdminComment(comment);
+        // لو عندك حقل updatedAt على Permit فعّله هنا:
+        try { p.getClass().getMethod("setUpdatedAt", java.time.OffsetDateTime.class);
+            p.getClass().getMethod("setUpdatedAt", java.time.OffsetDateTime.class)
+                    .invoke(p, java.time.OffsetDateTime.now()); } catch (Exception ignore) {}
+        p = permitRepository.save(p);
         p.getAttachments().size();
         return PermitMapper.toDTO(p);
     }
@@ -114,6 +122,9 @@ public class PermitService {
                 .orElseThrow(() -> new ResourceNotFoundException("Permit not found: " + id));
         p.setStatus(PermitStatus.REJECTED);
         p.setAdminComment(comment);
+        try { p.getClass().getMethod("setUpdatedAt", java.time.OffsetDateTime.class)
+                .invoke(p, java.time.OffsetDateTime.now()); } catch (Exception ignore) {}
+        p = permitRepository.save(p);
         p.getAttachments().size();
         return PermitMapper.toDTO(p);
     }
@@ -125,10 +136,12 @@ public class PermitService {
                 .orElseThrow(() -> new ResourceNotFoundException("Permit not found: " + id));
         p.setStatus(PermitStatus.EDIT_REQUESTED);
         p.setAdminComment(comment);
+        try { p.getClass().getMethod("setUpdatedAt", java.time.OffsetDateTime.class)
+                .invoke(p, java.time.OffsetDateTime.now()); } catch (Exception ignore) {}
+        p = permitRepository.save(p);
         p.getAttachments().size();
         return PermitMapper.toDTO(p);
     }
-
     @Transactional
     public List<PermitDTO> adminList(com.landuse.app.enums.PermitStatus status) {
         List<Permit> data = (status == null) ? permitRepository.findAll() : permitRepository.findByStatus(status);
@@ -152,5 +165,24 @@ public class PermitService {
         long rej = permitRepository.countByStatus(com.landuse.app.enums.PermitStatus.REJECTED);
         long edt = permitRepository.countByStatus(com.landuse.app.enums.PermitStatus.EDIT_REQUESTED);
         return new AdminReportSummaryDTO(total, pnd, apr, rej, edt);
+    }
+
+    @Transactional
+    public PageResponseDTO<PermitDTO> adminListPaged(PermitStatus status, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Permit> data = (status == null)
+                ? permitRepository.findAll(pageable)
+                : permitRepository.findByStatus(status, pageable);
+
+        data.forEach(pp -> pp.getAttachments().size());
+
+        List<PermitDTO> content = data.getContent().stream().map(PermitMapper::toDTO).toList();
+        return new PageResponseDTO<>(
+                content,
+                data.getTotalElements(),
+                data.getTotalPages(),
+                data.getNumber(),
+                data.getSize()
+        );
     }
 }

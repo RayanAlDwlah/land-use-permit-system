@@ -9,6 +9,7 @@ import { useAuth } from "./context/AuthContext.jsx";
 import PermitNew from "./pages/PermitNew.jsx";
 import PermitUpload from "./pages/PermitUpload.jsx";
 import AdminPermitView from "./pages/AdminPermitView.jsx";
+import PermitReadOnly from "./pages/PermitReadOnly.jsx";
 
 export default function App() {
   const { me } = useAuth();
@@ -82,6 +83,14 @@ export default function App() {
         element={<Navigate to={me ? (me.role === "ROLE_ADMIN" ? "/admin" : "/user") : "/login"} />}
       />
       <Route path="*" element={<div style={{ padding: 24, color: "#fff" }}>Not Found</div>} />
+      <Route
+  path="/admin/permits/:id/view"
+  element={
+    <ProtectedRoute role="ADMIN">
+      <PermitReadOnly />
+    </ProtectedRoute>
+  }
+/>
     </Routes>
   );
 }
