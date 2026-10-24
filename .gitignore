@@ -1,14 +1,19 @@
+# Environment (copy .env.example to .env)
+.env
+
 # Spring Boot build
-backend/target
+**/target/
 *.iml
 
 # React build
-frontend/node_modules
-frontend/build
-frontend/dist
+**/node_modules/
+**/dist/
+**/build/
+
+# Uploaded permit files
+BackEnd/Land Use Permit Management System/uploads/
 
 # IDE / System
 .DS_Store
 .idea
 .vscode
-BackEnd/Land Use Permit Management System/uploads/

@@ -24,6 +24,6 @@ public class RegisterRequest {
     @NotBlank(message = "National ID or CR is required")
     private String nationalId;
 
-    // optional — default to ROLE_USER in service
+    // ignored by the service: self-registration is always ROLE_USER
     private RoleType role;
 }

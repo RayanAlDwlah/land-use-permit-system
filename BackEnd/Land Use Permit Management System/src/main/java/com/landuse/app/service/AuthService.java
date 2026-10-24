@@ -23,7 +23,8 @@ public class AuthService {
         if (userRepository.existsByUsername(req.getUsername())) throw new IllegalArgumentException("Username is already taken");
         if (userRepository.existsByEmail(req.getEmail()))       throw new IllegalArgumentException("Email is already taken");
 
-        RoleType role = (req.getRole() != null) ? req.getRole() : RoleType.ROLE_USER;
+        // Self-registration always creates an applicant; reviewer accounts are provisioned separately.
+        RoleType role = RoleType.ROLE_USER;
 
         User u = User.builder()
                 .username(req.getUsername())

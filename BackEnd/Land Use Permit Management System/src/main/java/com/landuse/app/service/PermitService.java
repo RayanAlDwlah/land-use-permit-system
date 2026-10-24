@@ -104,6 +104,7 @@ public class PermitService {
     public PermitDTO adminApprove(Long id, String comment) {
         Permit p = permitRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Permit not found: " + id));
+        requirePending(p);
         p.setStatus(PermitStatus.APPROVED);
         if (StringUtils.hasText(comment)) p.setAdminComment(comment);
         // لو عندك حقل updatedAt على Permit فعّله هنا:
@@ -120,6 +121,7 @@ public class PermitService {
         if (!StringUtils.hasText(comment)) throw new IllegalArgumentException("comment is required for REJECT");
         Permit p = permitRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Permit not found: " + id));
+        requirePending(p);
         p.setStatus(PermitStatus.REJECTED);
         p.setAdminComment(comment);
         try { p.getClass().getMethod("setUpdatedAt", java.time.OffsetDateTime.class)
@@ -134,6 +136,7 @@ public class PermitService {
         if (!StringUtils.hasText(comment)) throw new IllegalArgumentException("comment is required for EDIT_REQUESTED");
         Permit p = permitRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Permit not found: " + id));
+        requirePending(p);
         p.setStatus(PermitStatus.EDIT_REQUESTED);
         p.setAdminComment(comment);
         try { p.getClass().getMethod("setUpdatedAt", java.time.OffsetDateTime.class)
@@ -184,5 +187,10 @@ public class PermitService {
                 data.getNumber(),
                 data.getSize()
         );
+    }
+
+    private static void requirePending(Permit p) {
+        if (p.getStatus() != PermitStatus.PENDING)
+            throw new IllegalStateException("Permit is not pending review: " + p.getStatus());
     }
 }
